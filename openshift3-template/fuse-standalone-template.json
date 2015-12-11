@@ -1,0 +1,230 @@
+{
+  "kind": "Template",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "fuse-standalone-6.2.1.84",
+    "creationTimestamp": null,
+    "annotations": {
+      "description": "Fuse standalone service",
+      "iconClass": "icon-fuse",
+      "tags": "${FUSE_CONTAINER_NAME}"
+    }
+  },
+  "objects": [
+    {
+      "kind": "Service",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${FUSE_CONTAINER_NAME}",
+        "creationTimestamp": null
+      },
+      "spec": {
+        "ports": [
+          {
+            "name": "web",
+            "protocol": "TCP",
+            "port": 8181,
+            "targetPort": 8181,
+            "nodePort": 0
+          }
+        ],
+        "selector": {
+          "name": "${FUSE_CONTAINER_NAME}"
+        },
+        "portalIP": "",
+        "type": "ClusterIP",
+        "sessionAffinity": "None"
+      }
+    },
+    {
+      "kind": "Route",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${FUSE_CONTAINER_NAME}",
+        "creationTimestamp": null
+      },
+      "spec": {
+          "host": "fuse-standalone1.cloudapps.mrobsonose.local",
+          "to": {
+              "kind": "Service",
+              "name": "${FUSE_CONTAINER_NAME}"
+          }
+      },
+      "status": {}
+    },
+    {
+      "kind": "ImageStream",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${FUSE_CONTAINER_NAME}",
+        "annotations": {
+          "description": "Keeps track of changes in the application image"
+        }
+      },
+      "spec": {},
+      "status": {
+        "dockerImageRepository": ""
+      }
+    },
+    {
+      "kind": "ImageStream",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "fuse-base-install",
+        "creationTimestamp": null
+      },
+      "spec": {
+        "dockerImageRepository": "mrobson/fuse-base-install:6.2.1.84"
+      },
+      "status": {
+        "dockerImageRepository": ""
+      }
+    },
+    {
+        "kind": "BuildConfig",
+        "apiVersion": "v1",
+        "metadata": {
+            "name": "${FUSE_CONTAINER_NAME}",
+            "creationTimestamp": null,
+            "labels": {
+                "app": "${FUSE_CONTAINER_NAME}"
+            }
+        },
+        "spec": {
+            "triggers": [
+                {
+                    "type": "GitHub",
+                    "github": {
+                        "secret": "mrobson911secret"
+                    }
+                },
+                {
+                    "type": "ConfigChange"
+                },
+                {
+                    "type": "ImageChange",
+                    "imageChange": {}
+                }
+            ],
+            "source": {
+                "type": "Git",
+                "git": {
+                    "uri": "${FUSE_IMAGE_GIT_REPO}",
+                    "ref": "${FUSE_IMAGE_VERSION}"
+                }
+            },
+            "strategy": {
+                "type": "Docker",
+                "dockerStrategy": {
+                    "from": {
+                        "kind": "DockerImage",
+                        "name": "${FUSE_BASE_IMAGE}:${FUSE_IMAGE_VERSION}"
+                    }
+                }
+            },
+            "output": {
+                "to": {
+                    "kind": "ImageStreamTag",
+                    "name": "${FUSE_CONTAINER_NAME}:${FUSE_IMAGE_VERSION}"
+                }
+            },
+            "resources": {}
+        },
+        "status": {
+            "lastVersion": 0
+        }
+    },
+    {
+      "kind": "DeploymentConfig",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${FUSE_CONTAINER_NAME}",
+        "creationTimestamp": null
+      },
+      "spec": {
+        "strategy": {
+          "type": "Recreate",
+          "resources": {}
+        },
+        "triggers": [
+          {
+            "type": "ImageChange",
+            "imageChangeParams": {
+              "automatic": true,
+              "containerNames": [
+                "fuse-standalone"
+              ],
+              "from": {
+                "kind": "ImageStreamTag",
+                "name": "${FUSE_CONTAINER_NAME}:${FUSE_IMAGE_VERSION}"
+              }
+            }
+          },
+          {
+            "type": "ConfigChange"
+          }
+        ],
+        "replicas": 1,
+        "selector": {
+          "name": "${FUSE_CONTAINER_NAME}"
+        },
+        "template": {
+          "metadata": {
+            "creationTimestamp": null,
+            "labels": {
+              "name": "${FUSE_CONTAINER_NAME}"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "name": "${FUSE_CONTAINER_NAME}",
+                "image": "${FUSE_IMAGE}:${FUSE_IMAGE_VERSION}",
+                "resources": {},
+                "terminationMessagePath": "/dev/termination-log",
+                "imagePullPolicy": "IfNotPresent",
+                "capabilities": {},
+                "securityContext": {
+                  "capabilities": {},
+                  "privileged": false
+                }
+              }
+            ],
+            "restartPolicy": "Always",
+            "dnsPolicy": "ClusterFirst"
+          }
+        }
+      }
+    }
+  ],
+  "parameters": [
+    {
+      "name": "FUSE_CONTAINER_NAME",
+      "description": "Fuse Container Name",
+      "value": "fuse-standalone"
+    },
+    {
+      "name": "FUSE_IMAGE",
+      "description": "Fuse Standalone Docker Image",
+      "value": "mrobson/fuse-standalone"
+    },
+    {
+      "name": "FUSE_BASE_IMAGE",
+      "description": "Fuse Base Docker Image",
+      "value": "mrobson/fuse-base-install"
+    },
+    {
+      "name": "FUSE_IMAGE_VERSION",
+      "description": "Fuse Docker Image Version",
+      "value": "6.2.1.84"
+    },
+    {
+      "name": "FUSE_IMAGE_GIT_REPO",
+      "description": "Fuse Standalone Image Git Repo",
+      "value": "https://github.com/mrobson/fuse-standalone.git"
+    }
+  ],
+  "labels": {
+    "template": "fuse-standalone-6.2.1.84"
+  }
+}

@@ -2,7 +2,7 @@ FROM mrobson/fuse-base-install:6.2.1.84
 
 MAINTAINER Matthew Robson <matthewrobson@gmail.com>
 
-USER fuse
+USER 1000
 
 EXPOSE 8181
 

@@ -74,7 +74,7 @@
         "creationTimestamp": null
       },
       "spec": {
-        "dockerImageRepository": "mrobson/fuse-base-install:6.2.1.84"
+        "dockerImageRepository": "${FUSE_BASE_IMAGE}:${FUSE_IMAGE_VERSION}"
       },
       "status": {
         "dockerImageRepository": ""

@@ -119,7 +119,8 @@
                     "from": {
                         "kind": "DockerImage",
                         "name": "${FUSE_BASE_IMAGE}:${FUSE_IMAGE_VERSION}"
-                    }
+                    },
+		    "forcePull": true
                 }
             },
             "output": {

@@ -44,7 +44,7 @@
         "creationTimestamp": null
       },
       "spec": {
-          "host": "fuse-standalone1.cloudapps.mrobsonose.local",
+          "host": "fuse-standalone1.apps.usersys.redhat.com",
           "to": {
               "kind": "Service",
               "name": "${FUSE_CONTAINER_NAME}"

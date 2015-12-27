@@ -4,7 +4,7 @@ MAINTAINER Matthew Robson <matthewrobson@gmail.com>
 
 USER 1000
 
-EXPOSE 8181
+EXPOSE 8181 1099
 
 WORKDIR /opt/fuse/${FUSE_ARTIFACT}
 
